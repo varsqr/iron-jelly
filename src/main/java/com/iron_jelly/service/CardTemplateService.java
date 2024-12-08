@@ -4,7 +4,9 @@ import com.iron_jelly.exception.CustomException;
 import com.iron_jelly.mapper.CardTemplateMapper;
 import com.iron_jelly.model.dto.CardTemplateDTO;
 import com.iron_jelly.model.entity.CardTemplate;
+import com.iron_jelly.model.entity.Company;
 import com.iron_jelly.repository.CardTemplateRepository;
+import com.iron_jelly.repository.CompanyRepository;
 import com.iron_jelly.util.MessageSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,15 +18,17 @@ public class CardTemplateService {
 
     private final CardTemplateRepository cardTemplateRepository;
     private final CardTemplateMapper cardTemplateMapper;
+    private final CompanyService companyService;
 
     public CardTemplateDTO saveOne(CardTemplateDTO cardTemplateDTO) {
-        CardTemplate cardTemplate = cardTemplateMapper.toEntity(cardTemplateDTO);
-        cardTemplate.setName(cardTemplate.getName());
-        cardTemplate.setLimit(cardTemplate.getLimit());
-        cardTemplate.setExpireDays(cardTemplate.getExpireDays());
-        cardTemplate.setDescription(cardTemplateDTO.getDescription());
 
-        return cardTemplateMapper.toDTO(cardTemplate);
+        Company company = companyService.findById(cardTemplateDTO.getCompanyId());
+
+        CardTemplate cardTemplate = cardTemplateMapper.toEntity(cardTemplateDTO);
+        cardTemplate.setCompany(company);
+        CardTemplate savedCardTemplate = cardTemplateRepository.save(cardTemplate);
+
+        return cardTemplateMapper.toDTO(savedCardTemplate);
     }
 
     public CardTemplateDTO getOne(long id) {
